@@ -63,7 +63,9 @@ Il registro può scendere a metà risposta, mai salire. Su materie serie il dial
 
 ## Installazione
 
-**Claude Code** — copia la cartella della skill fra quelle del progetto o dell'utente:
+### Claude Code (CLI)
+
+Copia la cartella della skill fra quelle del progetto o dell'utente:
 
 ```bash
 git clone https://github.com/lcarucci94-cpu/romanideroma-skill.git
@@ -71,11 +73,69 @@ mkdir -p ~/.claude/skills
 cp -r romanideroma-skill/skills/romanideroma ~/.claude/skills/
 ```
 
-Per un singolo progetto, copiala in `.claude/skills/` dentro il repo.
-Si attiva da sola sui trigger nel `description`, oppure chiamandola: *"parlame da romano"*.
+Per un singolo progetto, copiala in `.claude/skills/` dentro il repo invece che in `~/.claude/skills/`.
 
-**Claude.ai / API** — incolla `SKILL.md` come istruzioni di sistema o come Project
-instruction; i `references/` restano il materiale da fornire solo su necessità.
+### Claude.ai (browser, desktop, mobile)
+
+Le skill personalizzate si caricano da **Impostazioni**, non da un file incollato nelle
+istruzioni. Serve un piano con code execution abilitata (Free, Pro, Max, Team o Enterprise —
+su Team/Enterprise deve abilitarlo l'amministratore dell'organizzazione).
+
+1. **Settings → Capabilities** → attiva *"Code execution and file creation"*. Senza questa
+   voce attiva, la sezione Skills resta vuota o in grigio.
+2. **Settings → Customize → Skills** → tasto **"+"** → **"Create skill"**.
+3. Prepara lo zip **con la cartella della skill come radice** (non i file sciolti, non una
+   cartella-contenitore attorno). Dal repo clonato:
+   ```bash
+   cd romanideroma-skill/skills
+   zip -r romanideroma.zip romanideroma
+   ```
+   Lo zip deve contenere `romanideroma/SKILL.md` e `romanideroma/references/*.md` — il nome
+   della cartella dentro lo zip deve coincidere col campo `name` di `SKILL.md`.
+4. Carica `romanideroma.zip` nella finestra di upload. Comparirà nell'elenco delle skill.
+5. **Verifica che sia attiva** (toggle acceso) in Customize → Skills — caricata non significa
+   accesa.
+
+Le skill caricate così sono **private del tuo account**: non le vede automaticamente il resto
+del team, anche su piani Team/Enterprise.
+
+### Claude via API / Claude Code SDK
+
+Non c'è un meccanismo di upload: incolla il contenuto di `SKILL.md` nel system prompt o nelle
+istruzioni del Project. I `references/` restano materiale da passare solo quando serve —
+manualmente, o via tool call se l'integrazione lo prevede.
+
+## Come invocarla puntualmente
+
+### Automatica
+
+Con la skill attiva, Claude legge il campo `description` di `SKILL.md` e decide da solo se
+il messaggio dell'utente la riguarda — non serve nominarla. Funziona bene quando il messaggio
+contiene un innesco chiaro (*"parlami da romano"*, *"in romanesco"*, oppure un argomento
+tipicamente romano: cibo, quartieri, derby). Su richieste ambigue, l'attivazione automatica
+può non scattare: in quel caso vale la via esplicita.
+
+### Esplicita
+
+Due modi, entrambi più affidabili dell'attivazione automatica:
+
+- **In linguaggio naturale, nominandola**: *"Usa la skill RomaniDeRoma e rispondimi"*,
+  *"Con la skill romanideroma, dimmi come si dice..."*.
+- **Con lo slash command**: `/romanideroma` seguito dalla richiesta — chiama la skill per
+  nome, bypassando la valutazione automatica.
+
+Se nessuna delle due funziona, controlla in **Customize → Skills** che il toggle sia acceso:
+una skill caricata ma spenta non risponde né in automatico né su comando esplicito.
+
+Per tenerla **sempre spenta di default** e usarla solo su comando esplicito, aggiungi
+`disable-model-invocation: true` al frontmatter di `SKILL.md` prima di caricarla — questa
+repo non lo imposta, perché l'attivazione automatica sui trigger di `description` è il
+comportamento previsto.
+
+> I passaggi sopra vengono dalla documentazione ufficiale — [Use skills in Claude](https://support.claude.com/en/articles/12512180-use-skills-in-claude)
+> e [How to create custom skills](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills)
+> (Anthropic Help Center). L'interfaccia cambia nel tempo: se un menu non corrisponde più,
+> cerca "Skills" nelle impostazioni dell'account.
 
 ## Verifica
 
