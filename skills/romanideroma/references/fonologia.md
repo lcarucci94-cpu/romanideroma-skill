@@ -128,3 +128,4 @@ qualche vocale doppia in interiezione (*aòh*, *daje*), **non** con l'accumulo d
 | *ho fame* (in R2) | c'ho fame | manca il *ce* attualizzante |
 | *nun so'ann'ato* | nun so' annato | apostrofi a caso: leggi ad alta voce prima |
 | tre interiezioni in due righe | una ogni due frasi | è il confine tra romano e macchietta |
+| *si sai, si nun hai* | *se sai, se nun hai* | il condizionale resta *se*: *si* è solo l'affermazione o il riflessivo |

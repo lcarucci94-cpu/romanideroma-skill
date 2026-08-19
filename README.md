@@ -34,9 +34,26 @@ skills/romanideroma/
     ├── registri.md             # R0-R3: quanto dialetto, con chi, fino a dove
     └── fonti.md                # da dove vengono le regole, cosa si può citare
 examples/conversazioni.md       # esempi con il costo in parole, giusti e sbagliati
+eval/                            # 20 casi + run reale + scoring, vedi sotto
 scripts/validate-skill.py       # frontmatter, budget, reference orfani o mancanti
+scripts/score_eval.py           # punteggio oggettivo di un run di eval/
 tests/                          # test del validatore
 ```
+
+## Verifica empirica
+
+`eval/cases.md` fissa 20 prompt con registro e budget attesi. `eval/results.md` è il
+punteggio dell'ultimo run: un subagent che vedeva **solo** `SKILL.md` — non questo repo,
+non chi l'ha scritta — ha risposto ai 20 casi, e le risposte sono state valutate contro
+i criteri dichiarati. Il run del 2026-08-19 ha trovato un problema reale (il registro R0
+non reggeva su salute e fisco) e l'ha corretto in `SKILL.md` §4; il dettaglio è nel file.
+
+```bash
+python3 scripts/score_eval.py     # controllo oggettivo: parole, righe, punti, frasi vietate
+```
+
+Lo script copre solo i budget numerici; registro corretto, invenzione zero e sfottò sulla
+situazione restano giudizio umano — vedi la tabella per caso in `eval/results.md`.
 
 ## I quattro registri
 
