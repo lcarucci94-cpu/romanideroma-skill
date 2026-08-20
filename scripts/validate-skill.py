@@ -3,7 +3,8 @@
 
 Controlla quello che si rompe davvero in silenzio:
 frontmatter valido, budget di token del file sempre caricato,
-e coerenza fra i reference dichiarati e quelli sul disco.
+coerenza fra i reference dichiarati e quelli sul disco, e — se lo zip
+distribuibile e' presente — che il suo contenuto sia identico ai sorgenti.
 
 Uso:  python3 scripts/validate-skill.py [radice]
 """
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import re
 import sys
+import zipfile
 from pathlib import Path
 
 # SKILL.md entra nel contesto a ogni turno: oltre questa soglia la skill
@@ -36,6 +38,44 @@ def leggi_frontmatter(testo: str) -> dict[str, str]:
         if sep:
             campi[chiave.strip()] = valore.strip().strip("\"'")
     return campi
+
+
+def verifica_zip(radice: Path, skill_dir: Path) -> list[str]:
+    """Lo zip distribuibile deve coincidere byte per byte con i sorgenti.
+
+    E' l'unico file del repo che puo' andare fuori sincrono senza che nulla
+    si rompa: chi lo carica su claude.ai installerebbe una versione vecchia
+    della skill senza accorgersene.
+    """
+    zip_path = radice / "romanideroma.zip"
+    if not zip_path.is_file():
+        return []
+
+    attesi = {
+        f"{skill_dir.name}/{p.relative_to(skill_dir).as_posix()}": p.read_bytes()
+        for p in sorted(skill_dir.rglob("*"))
+        if p.is_file()
+    }
+
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            presenti = {
+                info.filename: z.read(info.filename)
+                for info in z.infolist()
+                if not info.is_dir()
+            }
+    except zipfile.BadZipFile:
+        return [f"{zip_path.name} non e' uno zip valido: rigeneralo"]
+
+    errori = []
+    for mancante in sorted(set(attesi) - set(presenti)):
+        errori.append(f"{zip_path.name}: manca {mancante} — rigenera lo zip")
+    for extra in sorted(set(presenti) - set(attesi)):
+        errori.append(f"{zip_path.name}: contiene {extra}, che non e' nei sorgenti")
+    for nome in sorted(set(attesi) & set(presenti)):
+        if attesi[nome] != presenti[nome]:
+            errori.append(f"{zip_path.name}: {nome} e' diverso dal sorgente — rigenera lo zip")
+    return errori
 
 
 def valida(radice: Path) -> list[str]:
@@ -88,6 +128,8 @@ def valida(radice: Path) -> list[str]:
     for ref in sorted(presenti):
         if not (cartella_ref / ref).read_text(encoding="utf-8").strip():
             errori.append(f"references/{ref} e' vuoto")
+
+    errori.extend(verifica_zip(radice, skill_dir))
 
     return errori
 

@@ -4,6 +4,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 RADICE = Path(__file__).resolve().parent.parent
@@ -92,6 +93,65 @@ class CasiRotti(unittest.TestCase):
             refs=("uno.md",),
         )
         self.assertEqual(validate_skill.valida(self.tmp), [])
+
+
+class ZipDistribuibile(unittest.TestCase):
+    """Lo zip in repo non deve poter divergere dai sorgenti in silenzio."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.skill = self.tmp / "skills" / "romanideroma"
+        (self.skill / "references").mkdir(parents=True)
+        (self.skill / "SKILL.md").write_text(
+            "---\nname: romanideroma\ndescription: d\n---\nvedi references/uno.md",
+            encoding="utf-8",
+        )
+        (self.skill / "references" / "uno.md").write_text("contenuto", encoding="utf-8")
+        self.addCleanup(shutil.rmtree, self.tmp)
+
+    def scrivi_zip(self, voci: dict[str, str]):
+        with zipfile.ZipFile(self.tmp / "romanideroma.zip", "w") as z:
+            for nome, contenuto in voci.items():
+                z.writestr(nome, contenuto)
+
+    def test_zip_assente_non_e_un_errore(self):
+        self.assertEqual(validate_skill.valida(self.tmp), [])
+
+    def test_zip_allineato_passa(self):
+        self.scrivi_zip({
+            "romanideroma/SKILL.md": (self.skill / "SKILL.md").read_text(encoding="utf-8"),
+            "romanideroma/references/uno.md": "contenuto",
+        })
+        self.assertEqual(validate_skill.valida(self.tmp), [])
+
+    def test_zip_con_contenuto_diverso_fallisce(self):
+        self.scrivi_zip({
+            "romanideroma/SKILL.md": "versione vecchia",
+            "romanideroma/references/uno.md": "contenuto",
+        })
+        errori = validate_skill.valida(self.tmp)
+        self.assertTrue(any("diverso dal sorgente" in e for e in errori))
+
+    def test_zip_a_cui_manca_un_file_fallisce(self):
+        self.scrivi_zip({
+            "romanideroma/SKILL.md": (self.skill / "SKILL.md").read_text(encoding="utf-8"),
+        })
+        errori = validate_skill.valida(self.tmp)
+        self.assertTrue(any("manca romanideroma/references/uno.md" in e for e in errori))
+
+    def test_zip_con_file_di_troppo_fallisce(self):
+        self.scrivi_zip({
+            "romanideroma/SKILL.md": (self.skill / "SKILL.md").read_text(encoding="utf-8"),
+            "romanideroma/references/uno.md": "contenuto",
+            "romanideroma/avanzo.md": "roba vecchia",
+        })
+        errori = validate_skill.valida(self.tmp)
+        self.assertTrue(any("avanzo.md" in e for e in errori))
+
+    def test_zip_corrotto_fallisce(self):
+        (self.tmp / "romanideroma.zip").write_bytes(b"non sono uno zip")
+        errori = validate_skill.valida(self.tmp)
+        self.assertTrue(any("non e' uno zip valido" in e for e in errori))
 
 
 if __name__ == "__main__":

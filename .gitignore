@@ -5,4 +5,7 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+# lo zip distribuibile e' tracciato apposta (vedi README);
+# ogni altro zip resta fuori
 *.zip
+!romanideroma.zip

@@ -34,7 +34,8 @@ skills/romanideroma/
     ├── registri.md             # R0-R3: quanto dialetto, con chi, fino a dove
     └── fonti.md                # da dove vengono le regole, cosa si può citare
 examples/conversazioni.md       # esempi con il costo in parole, giusti e sbagliati
-eval/                            # 20 casi + run reale + scoring, vedi sotto
+eval/                            # 24 casi + run reale + scoring, vedi sotto
+romanideroma.zip                # pacchetto pronto da caricare su claude.ai
 scripts/validate-skill.py       # frontmatter, budget, reference orfani o mancanti
 scripts/score_eval.py           # punteggio oggettivo di un run di eval/
 tests/                          # test del validatore
@@ -42,11 +43,13 @@ tests/                          # test del validatore
 
 ## Verifica empirica
 
-`eval/cases.md` fissa 20 prompt con registro e budget attesi. `eval/results.md` è il
+`eval/cases.md` fissa 24 prompt con registro e budget attesi. `eval/results.md` è il
 punteggio dell'ultimo run: un subagent che vedeva **solo** `SKILL.md` — non questo repo,
-non chi l'ha scritta — ha risposto ai 20 casi, e le risposte sono state valutate contro
-i criteri dichiarati. Il run del 2026-08-19 ha trovato un problema reale (il registro R0
+non chi l'ha scritta — ha risposto ai casi, e le risposte sono state valutate contro i
+criteri dichiarati. Il run del 2026-08-19 ha trovato un problema reale (il registro R0
 non reggeva su salute e fisco) e l'ha corretto in `SKILL.md` §4; il dettaglio è nel file.
+I 4 casi sulla parola d'attivazione (C21-C24) sono dichiarati ma non ancora eseguiti: lo
+scorer li segna `MANCA` ed esce con codice 1, così l'assenza non passa inosservata.
 
 ```bash
 python3 scripts/score_eval.py     # controllo oggettivo: parole, righe, punti, frasi vietate
@@ -101,14 +104,18 @@ su Team/Enterprise deve abilitarlo l'amministratore dell'organizzazione).
 1. **Settings → Capabilities** → attiva *"Code execution and file creation"*. Senza questa
    voce attiva, la sezione Skills resta vuota o in grigio.
 2. **Settings → Customize → Skills** → tasto **"+"** → **"Create skill"**.
-3. Prepara lo zip **con la cartella della skill come radice** (non i file sciolti, non una
-   cartella-contenitore attorno). Dal repo clonato:
+3. Procurati lo zip. **Pronto all'uso:** [`romanideroma.zip`](romanideroma.zip) nella radice
+   di questa repo — scaricalo e passa al punto 4. **Oppure rigeneralo** (necessario se hai
+   modificato la skill), con la cartella come radice dello zip:
    ```bash
    cd romanideroma-skill/skills
-   zip -r romanideroma.zip romanideroma
+   zip -r ../romanideroma.zip romanideroma
    ```
    Lo zip deve contenere `romanideroma/SKILL.md` e `romanideroma/references/*.md` — il nome
-   della cartella dentro lo zip deve coincidere col campo `name` di `SKILL.md`.
+   della cartella dentro lo zip deve coincidere col campo `name` di `SKILL.md`. Quello in
+   repo è tenuto allineato ai sorgenti da `validate-skill.py`: se modifichi la skill senza
+   rigenerarlo (o viceversa), la validazione fallisce invece di distribuire in silenzio una
+   versione vecchia.
 4. Carica `romanideroma.zip` nella finestra di upload. Comparirà nell'elenco delle skill.
 5. **Verifica che sia attiva** (toggle acceso) in Customize → Skills — caricata non significa
    accesa.
