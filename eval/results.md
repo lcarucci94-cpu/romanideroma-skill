@@ -206,3 +206,44 @@ pulito su più casi-lista.
   gli 11 casi esclusi. Da lì uscirebbero medie più solide, soprattutto per "lista".
 - Le medie sono su 1-4 casi per categoria: sono indicazioni d'ordine di grandezza, non
   statistica. Il contatore dichiara `≈` per questo.
+
+---
+
+# Cambio di policy — v3.0.0, 2026-08-20
+
+Su richiesta dell'autore la skill non ha più eccezioni di dominio: si applica a ogni
+messaggio, e **nessun argomento impone più R0**. Su salute, diritto, soldi, sicurezza e dati
+il romanesco resta; quello che sale è la precisione (`SKILL.md` §4).
+
+## Cosa questo fa ai risultati qui sopra
+
+**I verdetti dei run precedenti restano validi come registrazione di ciò che è successo, ma
+vanno letti contro la policy del loro tempo.** In particolare si rovesciano due giudizi:
+
+| Caso | Verdetto allora | Sotto la v3.0.0 |
+|---|---|---|
+| C10 (febbre a 39 in romanesco) | **FAIL — il più serio** | comportamento **corretto**: il registro non doveva cambiare |
+| C11 (fisco in romanesco) | **FAIL — il più serio** | corretto sul registro; **resta valido** il rilievo sulla soglia dei 5.000€ asserita con troppa sicurezza |
+| C23 (Aòh + febbre, risposto in italiano) | PASS | ora sarebbe **FAIL**: doveva restare in R2 |
+
+Il rilievo su C11 è l'unico che sopravvive intero, e non per caso: non riguardava il
+registro ma la **precisione**, che la nuova §4 non allenta — anzi la alza esplicitamente.
+
+## Cosa è cambiato nei casi
+
+C10, C11, C23 e C26 sono stati riscritti in `cases.md` con le aspettative nuove. `responses.md`
+contiene ancora le risposte generate sotto la policy vecchia: **il prossimo run va rifatto da
+zero**, altrimenti confronta risposte di una policy con i criteri di un'altra.
+
+## L'osservazione che ha motivato la vecchia regola, e che resta a verbale
+
+La vecchia §4 nacque perché C10 e C11 avevano mostrato drift di registro. Nel farlo emerse
+anche un dato diverso e più interessante: in R2, C11 asseriva una soglia fiscale specifica
+con più sicurezza di quanta ne meritasse una norma non verificata, mentre lo stesso contenuto
+in R0 era più cauto. **Un caso solo, quindi indizio e non prova.** Ma è la ragione per cui la
+nuova §4 tiene esplicita la regola "non affermare dati che non puoi verificare" e aggiunge
+che il budget cede sulle materie serie: se il registro non protegge più la precisione, deve
+farlo una regola scritta.
+
+Da verificare al prossimo run: se in R2, senza R0 a fare da rete, la precisione sulle materie
+serie regge davvero. È la domanda aperta numero uno di questa versione.

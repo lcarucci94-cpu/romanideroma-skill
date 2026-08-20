@@ -51,9 +51,13 @@ dichiarati.
 
 Il run del 2026-08-19 ha trovato un problema reale — il registro R0 non reggeva su salute
 e fisco — corretto in `SKILL.md` §4; il run del 2026-08-20 ha verificato che la correzione
-tiene anche con la parola d'attivazione davanti (C23). I 3 casi sul contatore (C25-C27)
-sono dichiarati ma non ancora eseguiti: lo scorer li segna `MANCA` ed esce con codice 1,
-così l'assenza non passa inosservata.
+tiene anche con la parola d'attivazione davanti (C23). **La v3.0.0 ha poi rovesciato quella
+policy per scelta dell'autore**: R0 non è più imposto da un argomento, e su materie serie
+sale la precisione invece di spegnersi il dialetto. I verdetti di quei run restano a
+registro, ma vanno letti contro la policy del loro tempo — vedi `eval/results.md`.
+
+I 3 casi sul contatore (C25-C27) sono dichiarati ma non ancora eseguiti: lo scorer li segna
+`MANCA` ed esce con codice 1, così l'assenza non passa inosservata.
 
 ```bash
 python3 scripts/score_eval.py     # controllo oggettivo: parole, righe, punti, frasi vietate
@@ -88,13 +92,16 @@ aveva la skill installata e l'ha applicata anche lì).
 
 | | Quando | Come suona |
 |---|---|---|
-| **R0** italiano con cadenza | salute, soldi, legale, codice, dati | italiano pulito, ritmo romano |
+| **R0** italiano con cadenza | **solo se l'utente lo chiede** | italiano pulito, ritmo romano |
 | **R1** romanesco leggero — *default* | quasi tutto | `er`, `'sto`, `nun`, `mo'`, infiniti tronchi |
 | **R2** romanesco pieno | l'utente lo chiede, o si parla di Roma | tutte le regole + lessico + un detto |
 | **R3** romanaccio | mai di default | solo su richiesta esplicita, mai contro qualcuno |
 
-Il registro può scendere a metà risposta, mai salire. Su materie serie il dialetto si spegne:
-**la persona non tocca la precisione**.
+Il registro lo decidono solo la richiesta dell'utente, il suo livello di lingua e la parola
+d'attivazione: **nessun argomento lo sceglie al posto suo.** Su materie serie — salute, soldi,
+diritto — il romanesco resta, ma sale la precisione al massimo: cifre, dosaggi, unità, nomi
+propri e riferimenti di legge restano sempre in lingua originale, e il budget cede a quello
+che serve per non far danni.
 
 ## Come suona
 
@@ -168,8 +175,8 @@ con o senza `!` o `,`:
 risponde in **R2** (romanesco pieno), **non ricambia il saluto** (l'*Aòh* è già il saluto,
 rispondergli con un altro *aòh* brucia budget per dire zero), e **non allarga il budget** —
 la richiesta è quello che viene *dopo* l'*Aoh*, e prende il budget che le spetta. Se quello
-che segue è materia seria (salute, soldi, legale), **R0 vince lo stesso**: la parola
-d'attivazione sceglie la voce, non sospende il giudizio.
+che segue è materia seria (salute, soldi, legale), **il registro non cambia**: resta R2 e
+sale la precisione. La parola d'attivazione sceglie la voce, non sospende il giudizio.
 
 ⚠️ **Non è un trigger deterministico.** L'attivazione automatica passa dal campo
 `description`, che Claude valuta semanticamente: è scritto per rendere `Aoh` il più
@@ -230,10 +237,11 @@ progetto non inventa numeri.
 **Cosa è**: la media misurata per la categoria di richiesta, dal confronto in
 `eval/results.md`. Il `≈` è parte del formato, non una svista.
 
-**Non appare** su saluti, domande secche, traduzioni e su tutto R0. I primi tre risparmiano
-2-7 token e la riga ne costa 6: stamparla lì annullerebbe il risparmio che dichiara. Su R0
+**Non appare** su saluti, domande secche, traduzioni e sulle materie serie. I primi tre
+risparmiano 2-7 token e la riga ne costa 6: stamparla lì annullerebbe il risparmio che
+dichiara. Su salute, soldi e diritto
 — salute, soldi, legale — è escluso per decenza, non per aritmetica: sotto un consiglio
-medico un contatore di token è fuori luogo.
+medico un contatore di token è fuori luogo, in qualunque registro sia scritto.
 
 Per toglierlo del tutto, cancella la §7 di `SKILL.md` e rigenera lo zip.
 
