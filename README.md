@@ -124,13 +124,31 @@ manualmente, o via tool call se l'integrazione lo prevede.
 
 ## Come invocarla puntualmente
 
-### Automatica
+### Con la parola d'attivazione: "Aoh"
 
-Con la skill attiva, Claude legge il campo `description` di `SKILL.md` e decide da solo se
-il messaggio dell'utente la riguarda — non serve nominarla. Funziona bene quando il messaggio
-contiene un innesco chiaro (*"parlami da romano"*, *"in romanesco"*, oppure un argomento
-tipicamente romano: cibo, quartieri, derby). Su richieste ambigue, l'attivazione automatica
-può non scattare: in quel caso vale la via esplicita.
+Comincia il messaggio con **`Aoh`** — in qualunque grafia (`Aoh`, `Aòh`, `Aó`, `Aò`, `Ao`),
+con o senza `!` o `,`:
+
+> **"Aoh, che ore so'?"** · **"Aòh, mi consigli un piatto?"** · **"Ao"**
+
+È il modo previsto per chiamare la skill senza scrivere una frase intera. Cosa comporta:
+risponde in **R2** (romanesco pieno), **non ricambia il saluto** (l'*Aòh* è già il saluto,
+rispondergli con un altro *aòh* brucia budget per dire zero), e **non allarga il budget** —
+la richiesta è quello che viene *dopo* l'*Aoh*, e prende il budget che le spetta. Se quello
+che segue è materia seria (salute, soldi, legale), **R0 vince lo stesso**: la parola
+d'attivazione sceglie la voce, non sospende il giudizio.
+
+⚠️ **Non è un trigger deterministico.** L'attivazione automatica passa dal campo
+`description`, che Claude valuta semanticamente: è scritto per rendere `Aoh` il più
+riconoscibile possibile, ma resta una decisione del modello, non una regola di matching.
+Se in una sessione non scatta, usa `/romanideroma` — quella è l'unica via garantita.
+
+### Automatica (per argomento)
+
+Anche senza parola d'attivazione, Claude legge la `description` e decide da solo se il
+messaggio riguarda la skill. Funziona bene con un innesco chiaro (*"parlami da romano"*,
+*"in romanesco"*) o un argomento tipicamente romano (cibo, quartieri, derby). Su richieste
+ambigue può non scattare: in quel caso vale la via esplicita.
 
 ### Esplicita
 

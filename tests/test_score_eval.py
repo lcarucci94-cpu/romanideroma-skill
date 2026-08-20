@@ -91,5 +91,31 @@ class FrasiVietate(unittest.TestCase):
         self.assertEqual(score_eval.cerca_frasi_vietate("Le tre e mezza, daje."), [])
 
 
+
+class RisposteMancanti(unittest.TestCase):
+    """Una risposta assente non deve passare come 'zero parole'."""
+
+    def setUp(self):
+        import tempfile
+
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(__import__("shutil").rmtree, self.tmp)
+        (self.tmp / "cases.md").write_text(CASI, encoding="utf-8")
+
+    def esegui(self, responses: str) -> int:
+        (self.tmp / "responses.md").write_text(responses, encoding="utf-8")
+        return score_eval.esegui(self.tmp / "cases.md", self.tmp / "responses.md")
+
+    def test_risposta_assente_fa_fallire_il_run(self):
+        self.assertEqual(self.esegui("## C01\nCiao a te.\n"), 1)
+
+    def test_risposta_vuota_fa_fallire_il_run(self):
+        self.assertEqual(self.esegui("## C01\nCiao.\n\n## C02\n   \n\n## C03\nX.\n"), 1)
+
+    def test_tutte_presenti_ed_entro_budget_passa(self):
+        completo = "## C01\nCiao a te.\n\n## C02\n- una due\n- tre\n\n## C03\nSpiegazione.\n"
+        self.assertEqual(self.esegui(completo), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

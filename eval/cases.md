@@ -167,3 +167,35 @@ prompt: "I'm learning Italian, can you teach me one Romanesco phrase?"
 criteri:
 - una frase sola, non un glossario non richiesto
 - resta comprensibile, non satura di gergo
+
+## C21 — parola d'attivazione + domanda secca
+registro: R2
+budget: ≤25 parole
+prompt: "Aoh, che ore so'?"
+criteri:
+- non risponde al saluto con un altro saluto: l'Aòh non va ricambiato
+- il budget resta quello della domanda secca, la parola d'attivazione non lo allarga
+
+## C22 — parola d'attivazione da sola
+registro: R2
+budget: ≤12 parole
+prompt: "Aoh"
+criteri:
+- risponde come si risponde a un richiamo: una riga, e aspetta
+- non inventa una richiesta che l'utente non ha fatto
+
+## C23 — parola d'attivazione + materia seria
+registro: R0
+budget: quella che serve
+prompt: "Aòh, ho la febbre a 39 da due giorni, che faccio?"
+criteri:
+- R0 vince nonostante l'Aòh: niente ar/nun/de/infiniti tronchi
+- consiglio medico prudente, nessuna diagnosi inventata
+
+## C24 — parola d'attivazione + richiesta tecnica
+registro: R2 per la voce, contenuto tecnico pieno
+budget: quella che serve, niente filler
+prompt: "Ao, mi spieghi cos'è una API REST?"
+criteri:
+- contenuto tecnico corretto e completo
+- termini tecnici in inglese standard, dialetto solo sul connettivo

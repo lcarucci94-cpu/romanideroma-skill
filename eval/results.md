@@ -98,3 +98,40 @@ Lo script copre solo i budget numerici o strutturati; il resto — registro gius
 invenzione zero, sfottò sulla situazione non sulla persona — va riletto a mano contro
 `cases.md`. Rigenera `responses.md` passando i 20 prompt e il testo di `SKILL.md` a una
 sessione che non ha visto questa repo, altrimenti il test è viziato da chi l'ha scritta.
+
+---
+
+# Aggiunta del 2026-08-20 — parola d'attivazione "Aoh"
+
+Aggiunti 4 casi (C21-C24) che coprono le tre conseguenze della parola d'attivazione
+dichiarate in `SKILL.md` §2: saluto non ricambiato, budget non allargato, R0 che vince
+comunque sulla materia seria.
+
+**Non ancora eseguiti.** `score_eval.py` li segna `MANCA` finché `responses.md` non
+contiene un run che li includa — e il run esce con codice 1, così l'assenza non passa
+inosservata.
+
+## Cosa questo eval può e non può verificare
+
+I casi C21-C24 verificano il **comportamento a skill già attiva**: dato che la skill è
+caricata, il registro e il budget sono quelli giusti? Questo si testa passando `SKILL.md`
+a una sessione pulita, com'è stato fatto per C01-C20.
+
+Quello che **non si può testare così** è se la parola `Aoh` faccia davvero *scattare*
+l'attivazione automatica. Quella decisione dipende dal campo `description` valutato
+semanticamente dal modello nel momento in cui l'utente scrive, dentro una sessione reale
+con la skill installata — non è riproducibile incollando `SKILL.md` in un prompt, perché
+in quel caso la skill è attiva per costruzione. L'unico modo di verificarlo è usarla:
+installare la skill su claude.ai, aprire una chat nuova, scrivere "Aoh, che ore so'?" e
+guardare se parte.
+
+Va detto chiaramente perché è la differenza tra le due garanzie che la skill offre:
+`/romanideroma` è deterministico, `Aoh` no.
+
+## Difetto trovato in score_eval.py (corretto)
+
+Aggiungendo C21-C24 senza risposte, lo scorer li ha riportati come `PASS (0/25 parole)`:
+una risposta mancante contava zero parole e passava qualunque budget. Falso positivo
+silenzioso — esattamente ciò che uno scorer deve impedire. Corretto: risposta assente o
+vuota ora è uno stato `MANCA` a sé, che fa uscire il run con codice 1. Tre test coprono
+il caso (`RisposteMancanti`).

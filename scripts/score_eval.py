@@ -112,9 +112,17 @@ def esegui(cases_path: Path, responses_path: Path) -> int:
     if mancanti:
         print(f"ATTENZIONE: nessuna risposta per {sorted(mancanti)}", file=sys.stderr)
 
-    pass_n = fail_n = skip_n = 0
+    pass_n = fail_n = skip_n = manca_n = 0
     for id_caso in sorted(casi, key=lambda x: (len(x), x)):
-        caso, risposta = casi[id_caso], risposte.get(id_caso, "")
+        caso, risposta = casi[id_caso], risposte.get(id_caso, "").strip()
+
+        # Una risposta assente non e' una risposta corta: senza questo ramo
+        # conterebbe zero parole e passerebbe qualunque budget.
+        if not risposta:
+            manca_n += 1
+            print(f"{id_caso}: MANCA (nessuna risposta in responses.md)")
+            continue
+
         esito = valuta_budget(caso.budget, risposta)
         vietate = cerca_frasi_vietate(risposta)
 
@@ -133,8 +141,11 @@ def esegui(cases_path: Path, responses_path: Path) -> int:
             riga += f"  |  frase vietata trovata: {vietate}"
         print(riga)
 
-    print(f"\n{pass_n} pass, {fail_n} fail, {skip_n} skip (budget non numerico, giudizio umano).")
-    return 1 if fail_n else 0
+    riassunto = f"\n{pass_n} pass, {fail_n} fail, {skip_n} skip (budget non numerico, giudizio umano)"
+    if manca_n:
+        riassunto += f", {manca_n} senza risposta"
+    print(riassunto + ".")
+    return 1 if (fail_n or manca_n) else 0
 
 
 def main() -> int:
