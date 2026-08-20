@@ -117,5 +117,30 @@ class RisposteMancanti(unittest.TestCase):
         self.assertEqual(self.esegui(completo), 0)
 
 
+class ConfiniDeiBlocchi(unittest.TestCase):
+    """Il testo fra un caso e l'altro non deve entrare nella risposta precedente."""
+
+    def test_intestazione_di_sezione_non_finisce_nel_caso_precedente(self):
+        testo = (
+            "## C01\nRisposta breve.\n\n"
+            "---\n\n"
+            "# Run del 2026-08-20\n\n"
+            "Prosa di contorno che non e' una risposta.\n\n"
+            "## C02\nAltra risposta.\n"
+        )
+        risposte = score_eval.leggi_risposte(testo)
+        self.assertEqual(risposte["C01"], "Risposta breve.")
+        self.assertEqual(risposte["C02"], "Altra risposta.")
+
+    def test_ignora_blocchi_che_non_sono_casi(self):
+        testo = "## Premessa\nRoba.\n\n## C01\nRisposta.\n"
+        risposte = score_eval.leggi_risposte(testo)
+        self.assertEqual(list(risposte), ["C01"])
+
+    def test_separatore_finale_non_conta_come_contenuto(self):
+        testo = "## C01\nRisposta.\n\n---\n\n## C02\nAltra.\n"
+        self.assertEqual(score_eval.leggi_risposte(testo)["C01"], "Risposta.")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -51,10 +51,18 @@ def leggi_casi(testo: str) -> dict[str, Caso]:
 
 
 def leggi_risposte(testo: str) -> dict[str, str]:
+    """Estrae {id_caso: risposta} dai blocchi '## Cxx'.
+
+    Spezza su un'intestazione di *qualunque* livello: separatori e titoli di sezione
+    fra un caso e l'altro finirebbero altrimenti dentro la risposta precedente,
+    gonfiandone il conteggio (successo gia' una volta, con C20).
+    """
     risposte: dict[str, str] = {}
-    for blocco in re.split(r"(?m)^## ", testo)[1:]:
+    for blocco in re.split(r"(?m)^#{1,6}\s+", testo)[1:]:
         intestazione, _, corpo = blocco.partition("\n")
-        risposte[intestazione.strip()] = corpo.strip()
+        id_caso = intestazione.strip()
+        if re.fullmatch(r"C\d+", id_caso):
+            risposte[id_caso] = corpo.strip().rstrip("-").strip()
     return risposte
 
 

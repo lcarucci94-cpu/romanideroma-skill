@@ -34,29 +34,55 @@ skills/romanideroma/
     ├── registri.md             # R0-R3: quanto dialetto, con chi, fino a dove
     └── fonti.md                # da dove vengono le regole, cosa si può citare
 examples/conversazioni.md       # esempi con il costo in parole, giusti e sbagliati
-eval/                            # 24 casi + run reale + scoring, vedi sotto
+eval/                            # 27 casi + run reali + baseline + scoring, vedi sotto
 romanideroma.zip                # pacchetto pronto da caricare su claude.ai
 scripts/validate-skill.py       # frontmatter, budget, reference orfani o mancanti
 scripts/score_eval.py           # punteggio oggettivo di un run di eval/
+scripts/token_savings.py        # misura il risparmio confrontando i due run
 tests/                          # test del validatore
 ```
 
 ## Verifica empirica
 
-`eval/cases.md` fissa 24 prompt con registro e budget attesi. `eval/results.md` è il
-punteggio dell'ultimo run: un subagent che vedeva **solo** `SKILL.md` — non questo repo,
-non chi l'ha scritta — ha risposto ai casi, e le risposte sono state valutate contro i
-criteri dichiarati. Il run del 2026-08-19 ha trovato un problema reale (il registro R0
-non reggeva su salute e fisco) e l'ha corretto in `SKILL.md` §4; il dettaglio è nel file.
-I 4 casi sulla parola d'attivazione (C21-C24) sono dichiarati ma non ancora eseguiti: lo
-scorer li segna `MANCA` ed esce con codice 1, così l'assenza non passa inosservata.
+`eval/cases.md` fissa 27 prompt con registro e budget attesi. `eval/results.md` è il
+punteggio dei run: un subagent che vedeva **solo** `SKILL.md` — non questo repo, non chi
+l'ha scritta — ha risposto ai casi, e le risposte sono state valutate contro i criteri
+dichiarati.
+
+Il run del 2026-08-19 ha trovato un problema reale — il registro R0 non reggeva su salute
+e fisco — corretto in `SKILL.md` §4; il run del 2026-08-20 ha verificato che la correzione
+tiene anche con la parola d'attivazione davanti (C23). I 3 casi sul contatore (C25-C27)
+sono dichiarati ma non ancora eseguiti: lo scorer li segna `MANCA` ed esce con codice 1,
+così l'assenza non passa inosservata.
 
 ```bash
 python3 scripts/score_eval.py     # controllo oggettivo: parole, righe, punti, frasi vietate
+python3 scripts/token_savings.py  # risparmio misurato, skill contro baseline
 ```
 
 Lo script copre solo i budget numerici; registro corretto, invenzione zero e sfottò sulla
 situazione restano giudizio umano — vedi la tabella per caso in `eval/results.md`.
+
+### Quanto risparmia davvero
+
+Misurato confrontando gli stessi prompt con e senza skill (13 casi con baseline pulito,
+run del 2026-08-20): **-79% di token complessivi**. Ma la media nasconde il dato che conta:
+
+| Categoria | Con skill | Senza | Risparmio |
+|---|---|---|---|
+| spiegazione tecnica | ~40 | ~240 | **-200** (83%) |
+| materia seria (R0) | ~54 | ~252 | **-198** (79%) |
+| consiglio, opinione | ~24 | ~135 | **-111** (82%) |
+| saluto | ~7 | ~14 | **-7** (50%) |
+| domanda secca | ~3 | ~9 | **-6** (67%) |
+
+**Il risparmio è quasi tutto nelle risposte lunghe.** Su un saluto anche una risposta
+standard è già corta, e non c'è molto da comprimere.
+
+Due avvertenze sul metodo, entrambe documentate in `eval/results.md`: i token sono
+**stimati** a 4 caratteri/token (in ambiente non c'era un tokenizer — le parole invece sono
+esatte), e 11 casi su 24 sono esclusi perché il baseline era contaminato (il subagent
+aveva la skill installata e l'ha applicata anche lì).
 
 ## I quattro registri
 
@@ -189,6 +215,27 @@ python3 scripts/validate-skill.py
 Il validatore fallisce se `SKILL.md` supera il budget di 1.400 parole, se il frontmatter è
 rotto, se un reference citato non esiste o se un reference esiste ma nessuno lo cita —
 un file che nessuno carica è peso morto.
+
+## Il contatore di token
+
+Ogni risposta lunga si chiude con una riga:
+
+> 🪙 ≈200 tok risparmiati
+
+**Cosa non è**: una misura di quella risposta. Claude non può contare i token di una
+risposta che non ha scritto — il confronto con "quanto sarebbe costata senza skill" è un
+controfattuale, non un dato. Un numero calcolato lì per lì sarebbe inventato, e questo
+progetto non inventa numeri.
+
+**Cosa è**: la media misurata per la categoria di richiesta, dal confronto in
+`eval/results.md`. Il `≈` è parte del formato, non una svista.
+
+**Non appare** su saluti, domande secche, traduzioni e su tutto R0. I primi tre risparmiano
+2-7 token e la riga ne costa 6: stamparla lì annullerebbe il risparmio che dichiara. Su R0
+— salute, soldi, legale — è escluso per decenza, non per aritmetica: sotto un consiglio
+medico un contatore di token è fuori luogo.
+
+Per toglierlo del tutto, cancella la §7 di `SKILL.md` e rigenera lo zip.
 
 ## Limiti, dichiarati
 

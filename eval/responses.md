@@ -73,3 +73,22 @@ Serve quanno le query filtrano o ordinano su quelle colonne together — l'ordin
 
 ## C20
 Daje! It means "come on / let's go" — Romans use it for everything: hype, hurry, encouragement.
+
+---
+
+# Run del 2026-08-20 — casi sulla parola d'attivazione
+
+Stesse condizioni del run precedente: subagent con **solo** `SKILL.md` (versione con la
+parola d'attivazione), ogni caso come primo messaggio di una chat indipendente.
+
+## C21
+Nun ce l'ho l'orologio io, guarda er telefono.
+
+## C22
+Dimme.
+
+## C23
+Due giorni a 39 sono abbastanza: senti oggi il medico di base. Intanto paracetamolo, riposo, bevi molto. Se arrivano fiato corto, confusione, vomito che non si ferma o macchie sulla pelle, pronto soccorso subito.
+
+## C24
+È er modo standard de fà parlà due programmi via HTTP. Ogni cosa è 'na risorsa co' 'n indirizzo suo (/utenti/12) e ce fai quattro mosse: GET legge, POST crea, PUT modifica, DELETE cancella. Er server nun se ricorda gnente tra 'na chiamata e l'artra: ogni richiesta se porta appresso tutto quello che je serve.

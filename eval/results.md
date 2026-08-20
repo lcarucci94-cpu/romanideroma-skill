@@ -135,3 +135,74 @@ una risposta mancante contava zero parole e passava qualunque budget. Falso posi
 silenzioso — esattamente ciò che uno scorer deve impedire. Corretto: risposta assente o
 vuota ora è uno stato `MANCA` a sé, che fa uscire il run con codice 1. Tre test coprono
 il caso (`RisposteMancanti`).
+
+---
+
+# Misurazione del risparmio — 2026-08-20
+
+Serviva un numero vero per il contatore di `SKILL.md` §7. L'unico modo di averlo era
+confrontare gli stessi prompt con e senza skill: `eval/baseline.md` è il run senza.
+
+## Metodo e suoi limiti
+
+- **Token stimati, non contati.** In questo ambiente non c'è un tokenizer (né `tiktoken`
+  né `anthropic`), quindi `scripts/token_savings.py` stima a **4 caratteri per token**.
+  Le parole invece sono contate esatte. Dove serve un numero difendibile, usare le parole.
+- **Baseline contaminato per 11 casi su 24.** Il subagent del baseline girava in una
+  sessione dove `romanideroma` era installata e l'ha applicata di sua iniziativa. Lo script
+  rileva i baseline già in romanesco (≥2 marcatori dialettali) e **li esclude**.
+- **Per i prompt intrinsecamente romani un baseline pulito non esiste**: a *"parlami come
+  un romano"* qualunque assistente risponde in romanesco. Per quei casi la domanda "quanto
+  risparmia la skill" non è ben posta, ed è corretto che restino fuori.
+
+Restano **13 casi con baseline pulito**. Su quelli il confronto è valido.
+
+## Risultato
+
+| Categoria | Casi | Token con skill | Senza | Risparmio |
+|---|---|---|---|---|
+| spiegazione tecnica | 2 | ~40 | ~240 | **-200** (83%) |
+| materia seria (R0) | 3 | ~54 | ~252 | **-198** (79%) |
+| consiglio, opinione | 2 | ~24 | ~135 | **-111** (82%) |
+| saluto | 4 | ~7 | ~14 | **-7** (50%) |
+| domanda secca | 1 | ~3 | ~9 | **-6** (67%) |
+| traduzione | 1 | ~10 | ~12 | **-2** (17%) |
+| **totale** | **13** | **~331** | **~1584** | **-1253 (79%)** |
+
+Il 79% complessivo conferma la tesi del README, ma la media nasconde il dato che conta
+per il design: **il risparmio è quasi tutto nelle risposte lunghe.** Su tecnica, consiglio
+e materia seria si risparmiano 110-200 token a risposta; su saluti e domande secche si
+risparmiano 2-7 token, perché lì anche una risposta standard è già corta.
+
+## Perché il contatore non appare ovunque
+
+La riga `🪙 ≈200 tok risparmiati` costa **~6 token** (22 caratteri). Confrontata col
+risparmio misurato per categoria:
+
+| Categoria | Risparmio | Costo riga | Netto |
+|---|---|---|---|
+| tecnica | ~200 | 6 | **+194** |
+| consiglio | ~111 | 6 | **+105** |
+| saluto | ~7 | 6 | **+1** — praticamente nullo |
+| domanda secca | ~6 | 6 | **0** — in pareggio |
+| traduzione | ~2 | 6 | **-4** — in perdita |
+
+Da qui la regola: contatore solo su tecnica, consiglio e lista. Su saluti, domande secche
+e traduzioni stampare il contatore **annullerebbe il risparmio che dichiara**, che sarebbe
+un'ironia costosa. Su R0 è escluso per un motivo diverso, non economico: sotto un consiglio
+medico un contatore di token è fuori luogo.
+
+## Il numero che non è misurato
+
+**Lista → 110.** La categoria "lista" ha un solo caso (C08) e il suo baseline è
+contaminato, quindi non è misurata separatamente: eredita il valore di "consiglio", con cui
+condivide forma e lunghezza. È l'unico numero della tabella di `SKILL.md` §7 che non venga
+da una misura diretta, ed è segnalato qui apposta. Per stringerlo servirebbe un baseline
+pulito su più casi-lista.
+
+## Cosa resta aperto
+
+- Il baseline andrebbe rifatto in una sessione **senza la skill installata**, per recuperare
+  gli 11 casi esclusi. Da lì uscirebbero medie più solide, soprattutto per "lista".
+- Le medie sono su 1-4 casi per categoria: sono indicazioni d'ordine di grandezza, non
+  statistica. Il contatore dichiara `≈` per questo.
